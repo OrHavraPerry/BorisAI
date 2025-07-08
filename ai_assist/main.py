@@ -21,7 +21,12 @@ def cli(argv: list[str] | None = None) -> None:
     args = parser.parse_args(argv)
 
     if args.cmd == "plan":
-        steps = plan_task(args.prompt, model=args.model)
+        try:
+            steps = plan_task(args.prompt, model=args.model)
+        except Exception as exc:  # LLM or parsing errors
+            import sys
+            print(f"Error: {exc}", file=sys.stderr)
+            raise SystemExit(1)
         for step in steps:
             print(f"- {step}")
     elif args.cmd == "chat":
@@ -34,7 +39,11 @@ def cli(argv: list[str] | None = None) -> None:
                 break
             if prompt.strip().lower() in {"exit", "quit"}:
                 break
-            print(agent.ask(prompt))
+            try:
+                print(agent.ask(prompt))
+            except Exception as exc:
+                import sys
+                print(f"Error: {exc}", file=sys.stderr)
 
 
 def main() -> None:
