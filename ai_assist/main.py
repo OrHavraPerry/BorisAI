@@ -1,0 +1,44 @@
+"""Main entrypoint for BorisAI."""
+
+from .agent.planner import plan_task
+from .agent.llm import generate
+
+
+def cli(argv: list[str] | None = None) -> None:
+    """Command-line interface for BorisAI."""
+    import argparse
+
+    parser = argparse.ArgumentParser(description="BorisAI")
+    sub = parser.add_subparsers(dest="cmd", required=True)
+
+    p_plan = sub.add_parser("plan", help="Create a numbered plan for a prompt")
+    p_plan.add_argument("prompt")
+    p_plan.add_argument("--model", default="mistral:instruct")
+
+    p_chat = sub.add_parser("chat", help="Chat with the local model")
+    p_chat.add_argument("--model", default="mistral:instruct")
+
+    args = parser.parse_args(argv)
+
+    if args.cmd == "plan":
+        steps = plan_task(args.prompt, model=args.model)
+        for step in steps:
+            print(f"- {step}")
+    elif args.cmd == "chat":
+        print("Type 'exit' to quit.")
+        while True:
+            try:
+                prompt = input("> ")
+            except EOFError:
+                break
+            if prompt.strip().lower() in {"exit", "quit"}:
+                break
+            print(generate(prompt, model=args.model).strip())
+
+
+def main() -> None:
+    cli()
+
+
+if __name__ == "__main__":
+    main()
