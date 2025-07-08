@@ -1,7 +1,7 @@
 """Main entrypoint for BorisAI."""
 
 from .agent.planner import plan_task
-from .agent.llm import generate
+from .agent import ChatAgent
 
 
 def cli(argv: list[str] | None = None) -> None:
@@ -25,6 +25,7 @@ def cli(argv: list[str] | None = None) -> None:
         for step in steps:
             print(f"- {step}")
     elif args.cmd == "chat":
+        agent = ChatAgent(model=args.model)
         print("Type 'exit' to quit.")
         while True:
             try:
@@ -33,7 +34,7 @@ def cli(argv: list[str] | None = None) -> None:
                 break
             if prompt.strip().lower() in {"exit", "quit"}:
                 break
-            print(generate(prompt, model=args.model).strip())
+            print(agent.ask(prompt))
 
 
 def main() -> None:
